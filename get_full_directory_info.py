@@ -134,8 +134,13 @@ def main():
     print("=" * 60)
 
     # Get current directory
-    current_dir = os.getcwd()
-    print(f"\nCurrent directory: {current_dir}")
+    # current_dir = os.getcwd()
+    current_dir = input("\nEnter full path to analyze: ").strip()
+    # print(f"\nCurrent directory: {current_dir}")
+
+    if not current_dir:
+        print("Full path can not be empty. Aborting.")
+        sys.exit(1)
 
     # Get current date for filename
     current_date = datetime.datetime.now().strftime("%Y%m%d")
