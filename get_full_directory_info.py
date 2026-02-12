@@ -10,8 +10,6 @@ from modules.directory_size import get_directory_size, format_size
 from modules.directory_tree_command import run_tree_command
 from modules.count_total_files_in_directory import count_total_files
 import os
-
-# import subprocess
 import sys
 
 
@@ -63,10 +61,15 @@ def main():
             item_path = os.path.join(directory, item)
             if os.path.isdir(item_path):
                 file_count = count_total_files(item_path)
-                print(f"  {item}/: {file_count} files")
-                subfolders.append((item, item_path))
+                subfolders.append((item, item_path, file_count))
     except PermissionError:
         print("Permission denied accessing some directories!")
+
+    sorted_subfolders = sorted(subfolders)
+    for folder, _, file_count in sorted_subfolders:
+        print(f"  {folder}/: {file_count} files")
+
+    print("\n")
 
     # Count by file type
     if directory_total_files > 0:
@@ -82,9 +85,9 @@ def main():
     print(f"\nSize of directory: {format_size(directory_size)}")
 
     # Get size of each subfolder
-    if subfolders:
+    if sorted_subfolders:
         print("\nSize of each subfolder:")
-        for folder_name, folder_path in subfolders:
+        for folder_name, folder_path, _ in sorted_subfolders:
             folder_size = get_directory_size(folder_path)
             print(f"  {folder_name}/: {format_size(folder_size)}")
 
