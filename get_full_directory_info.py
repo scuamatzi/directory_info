@@ -133,12 +133,10 @@ def main():
     print("DIRECTORY INFORMATION")
     print("=" * 60)
 
-    # Get current directory
-    # current_dir = os.getcwd()
-    current_dir = input("\nEnter full path to analyze: ").strip()
-    # print(f"\nCurrent directory: {current_dir}")
+    # Get directory
+    directory = input("\nEnter full path to analyze: ").strip()
 
-    if not current_dir:
+    if not directory:
         print("Full path can not be empty. Aborting.")
         sys.exit(1)
 
@@ -166,16 +164,16 @@ def main():
     print("FILE COUNTS")
     print("-" * 60)
 
-    # Count files in current directory
-    current_dir_total_files = count_total_files(current_dir)
-    print(f"\nNumber of files in current directory: {current_dir_total_files}")
+    # Count files in directory
+    directory_total_files = count_total_files(directory)
+    print(f"\nNumber of files in directory: {directory_total_files}")
 
     # Count files in each subfolder
-    print(f"\nNumber of files in each subfolder:")
+    print("\nNumber of files in each subfolder:")
     subfolders = []
     try:
-        for item in os.listdir(current_dir):
-            item_path = os.path.join(current_dir, item)
+        for item in os.listdir(directory):
+            item_path = os.path.join(directory, item)
             if os.path.isdir(item_path):
                 file_count = count_total_files(item_path)
                 print(f"  {item}/: {file_count} files")
@@ -184,17 +182,17 @@ def main():
         print("Permission denied accessing some directories!")
 
     # Count by file type
-    if current_dir_total_files > 0:
+    if directory_total_files > 0:
         print("\nTop 10 extension files ")
-        file_types(current_dir)
+        file_types(directory)
 
     print("\n" + "-" * 60)
     print("DIRECTORY SIZES")
     print("-" * 60)
 
-    # Get size of current directory
-    current_dir_size = get_directory_size(current_dir)
-    print(f"\nSize of current directory: {format_size(current_dir_size)}")
+    # Get size of directory
+    directory_size = get_directory_size(directory)
+    print(f"\nSize of directory: {format_size(directory_size)}")
 
     # Get size of each subfolder
     if subfolders:
@@ -203,24 +201,24 @@ def main():
             folder_size = get_directory_size(folder_path)
             print(f"  {folder_name}/: {format_size(folder_size)}")
 
-    print("\n" + "-" * 60)
-    print("TREE STRUCTURE OUTPUT")
-    print("-" * 60)
-
     if tree_command_selection in ["y", "Y", "yes"]:
+        print("\n" + "-" * 60)
+        print("TREE STRUCTURE OUTPUT")
+        print("-" * 60)
+
         # Generate tree outputs
         print("\nGenerating tree command output...")
 
         for level, filename in tree_files.items():
             print(f"\nLevel {level}:")
-            run_tree_command(level, filename, current_dir)
+            run_tree_command(level, filename, directory)
 
     print("\n" + "=" * 60)
     print("SUMMARY")
     print("=" * 60)
-    print(f"• Current directory: {current_dir}")
-    print(f"• Files in current directory: {current_dir_total_files}")
-    print(f"• Total size: {format_size(current_dir_size)}")
+    print(f"• Directory analyzed: {directory}")
+    print(f"• Files in directory: {directory_total_files}")
+    print(f"• Total size: {format_size(directory_size)}")
     if tree_command_selection in ["y", "Y", "yes"]:
         print("• Tree outputs generated:")
         for level, filename in tree_files.items():
