@@ -5,12 +5,16 @@ size of folders and 'tree command' structure.
 """
 
 import datetime
-from modules.directory_file_types import file_types
-from modules.directory_size import get_directory_size, format_size
-from modules.directory_tree_command import run_tree_command
-from modules.count_total_files_in_directory import count_total_files
 import os
 import sys
+
+from modules.directory_tools import (
+    file_types,
+    get_directory_size,
+    format_size,
+    run_tree_command,
+    count_total_files,
+)
 
 
 def main():
