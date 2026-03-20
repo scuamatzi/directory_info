@@ -17,6 +17,39 @@ from modules.directory_tools import (
 )
 
 
+def create_tree_filenames():
+    # Get current date for filenames
+    current_date = datetime.datetime.now().strftime("%Y%m%d")
+
+    filename_prefix = input("\nEnter filename for tree command results: ").strip()
+
+    if not filename_prefix:
+        filename_prefix = "tree_output"
+
+    # Generate tree filenames
+    tree_file_names = {
+        1: f"{filename_prefix}_L1_{current_date}.txt",
+        2: f"{filename_prefix}_L2_{current_date}.txt",
+        3: f"{filename_prefix}_L3_{current_date}.txt",
+    }
+    return tree_file_names
+
+
+def get_total_files_per_subfolder(directory):
+    subfolders = []
+    try:
+        for item in os.listdir(directory):
+            item_path = os.path.join(directory, item)
+            if os.path.isdir(item_path):
+                file_count = count_total_files(item_path)
+                subfolders.append((item, item_path, file_count))
+    except PermissionError:
+        print("Permission denied accessing some directories!")
+
+    sorted_subfolders = sorted(subfolders)
+    return sorted_subfolders
+
+
 def main():
     print("\n" + "=" * 60)
     print("DIRECTORY INFORMATION")
@@ -29,25 +62,11 @@ def main():
         print("Full path can not be empty. Aborting.")
         sys.exit(1)
 
-    # Get current date for filename
-    current_date = datetime.datetime.now().strftime("%Y%m%d")
-
     # Ask if tree command is needed
     tree_command_selection = input("\nDo you need tree command info? (y/n) ").strip()
 
     if tree_command_selection in ["y", "Y", "yes"]:
-        # Ask for filename prefix
-        filename_prefix = input("\nEnter filename for tree command results: ").strip()
-
-        if not filename_prefix:
-            filename_prefix = "tree_output"
-
-        # Generate tree filenames
-        tree_files = {
-            1: f"{filename_prefix}_L1_{current_date}.txt",
-            2: f"{filename_prefix}_L2_{current_date}.txt",
-            3: f"{filename_prefix}_L3_{current_date}.txt",
-        }
+        tree_file_names = create_tree_filenames()
 
     print("\n" + "-" * 60)
     print("FILE COUNTS")
@@ -58,22 +77,16 @@ def main():
     print(f"\nNumber of files in directory: {directory_total_files}")
 
     # Count files in each subfolder
-    print("\nNumber of files in each subfolder:")
-    subfolders = []
-    try:
-        for item in os.listdir(directory):
-            item_path = os.path.join(directory, item)
-            if os.path.isdir(item_path):
-                file_count = count_total_files(item_path)
-                subfolders.append((item, item_path, file_count))
-    except PermissionError:
-        print("Permission denied accessing some directories!")
 
-    sorted_subfolders = sorted(subfolders)
-    for folder, _, file_count in sorted_subfolders:
-        print(f"  {folder}/: {file_count} files")
+    subfolders = get_total_files_per_subfolder(directory)
 
-    print("\n")
+    if subfolders:
+        print("\nNumber of files in each subfolder:")
+
+        for folder, _, file_count in subfolders:
+            print(f"  {folder}/: {file_count} files")
+
+        print("\n")
 
     # Count by file type
     if directory_total_files > 0:
@@ -89,9 +102,9 @@ def main():
     print(f"\nSize of directory: {format_size(directory_size)}")
 
     # Get size of each subfolder
-    if sorted_subfolders:
+    if subfolders:
         print("\nSize of each subfolder:")
-        for folder_name, folder_path, _ in sorted_subfolders:
+        for folder_name, folder_path, _ in subfolders:
             folder_size = get_directory_size(folder_path)
             print(f"  {folder_name}/: {format_size(folder_size)}")
 
@@ -103,21 +116,23 @@ def main():
         # Generate tree outputs
         print("\nGenerating tree command output...")
 
-        for level, filename in tree_files.items():
+        for level, filename in tree_file_names.items():
             print(f"\nLevel {level}:")
             run_tree_command(level, filename, directory)
 
     print("\n" + "=" * 60)
     print("SUMMARY")
     print("=" * 60)
+
     print(f"• Directory analyzed: {directory}")
     print(f"• Files in directory: {directory_total_files}")
     print(f"• Total size: {format_size(directory_size)}")
+
     if tree_command_selection in ["y", "Y", "yes"]:
         print("• Tree outputs generated:")
-        for level, filename in tree_files.items():
+        for level, filename in tree_file_names.items():
             if os.path.exists(filename):
-                print(f" - Leveln {level}: {filename}")
+                print(f" - Level {level}: {filename}")
 
     print("\nScript completed successfully!")
     print("=" * 60)
