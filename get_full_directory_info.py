@@ -6,6 +6,9 @@ size of folders and 'tree command' structure.
 
 import datetime
 import os
+from rich.console import Console
+from rich.panel import Panel
+from rich.table import Table
 import sys
 
 from modules.directory_tools import (
@@ -15,6 +18,8 @@ from modules.directory_tools import (
     run_tree_command,
     count_total_files,
 )
+
+console = Console()
 
 
 def create_tree_filenames():
@@ -51,15 +56,29 @@ def get_total_files_per_subfolder(directory):
 
 
 def main():
-    print("\n" + "=" * 60)
-    print("DIRECTORY INFORMATION")
-    print("=" * 60)
+    # print("\n" + "=" * 60)
+    # print("DIRECTORY INFORMATION")
+    # print("=" * 60)
+
+    print("\n")
+    console.print(
+        Panel(
+            "- Total files inside directory\n"
+            + "- Total files inside each subfolder\n"
+            + "- Top 10 file extensions in directory (the extension and how many)\n"
+            + "- Total size of directory\n"
+            + "- Total size of each subdirectory\n"
+            "- [Optional] write down 'tree' command for directory with 3 levels",
+            title="DIRECTORY INFORMATION",
+        ),
+        style="dodger_blue2",
+    )
 
     # Get directory to analyze
     directory = input("\nEnter full path to analyze: ").strip()
 
     if not directory:
-        print("Full path can not be empty. Aborting.")
+        console.print("Full path can not be empty. Aborting.", style="dark_orange")
         sys.exit(1)
 
     # Ask if tree command is needed
@@ -68,25 +87,42 @@ def main():
     if tree_command_selection in ["y", "Y", "yes"]:
         tree_file_names = create_tree_filenames()
 
-    print("\n" + "-" * 60)
-    print("FILE COUNTS")
-    print("-" * 60)
+    # print("\n" + "-" * 60)
+    # print("FILE COUNTS")
+    # print("-" * 60)
+
+    print("\n")
+    console.print(Panel("\tFILE COUNTS", style="dodger_blue2"))
 
     # Count files in directory
     directory_total_files = count_total_files(directory)
-    print(f"\nNumber of files in directory: {directory_total_files}")
+    console.print(
+        f"\nTotal files in {directory}: [bold]{directory_total_files}[/bold]\n",
+        style="turquoise4",
+    )
 
     # Count files in each subfolder
 
     subfolders = get_total_files_per_subfolder(directory)
 
     if subfolders:
-        print("\nNumber of files in each subfolder:")
+        # table_files_per_subfolder = Table(title="\nNumber of files in each subfolder")
+        table_files_per_subfolder = Table(
+            title="\nFiles in each subfolder", show_lines=True
+        )
+
+        table_files_per_subfolder.add_column("Folder", justify="center")
+        table_files_per_subfolder.add_column("# Files", justify="center")
+        # print("\nNumber of files in each subfolder:")
 
         for folder, _, file_count in subfolders:
-            print(f"  {folder}/: {file_count} files")
+            table_files_per_subfolder.add_row(f"{folder}", f"{file_count}")
+            # table_files_per_subfolder.add_row(f"{file_count}")
 
-        print("\n")
+        console.print(table_files_per_subfolder)
+        # print(f"  {folder}/: {file_count} files")
+
+        # print("\n")
 
     # Count by file type
     if directory_total_files > 0:
