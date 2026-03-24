@@ -1,6 +1,10 @@
 import os
+from rich.console import Console
+from rich.table import Table
 import subprocess
 import sys
+
+console = Console()
 
 
 def file_types(directory, top_n=10):
@@ -31,9 +35,17 @@ def file_types(directory, top_n=10):
     )
 
     # Display top N
+    print("\n")
+    table_file_types = Table(title="File Types", show_lines=True)
+
+    table_file_types.add_column("Extension", justify="center")
+    table_file_types.add_column("Count", justify="center")
     for i, (ext, count) in enumerate(sorted_extensions[:top_n], 1):
         percentage = (count / sum(extension_count.values())) * 100
-        print(f"  {i:2}. {ext:<15} {count:>8,} files ({percentage:.1f}%)")
+        # print(f"  {i:2}. {ext:<15} {count:>8,} files ({percentage:.1f}%)")
+        table_file_types.add_row(f"{i:2} - {ext}", f"{count} files ({percentage:.1f}%)")
+
+    console.print(table_file_types)
 
 
 def get_directory_size(directory_path):
@@ -49,7 +61,8 @@ def get_directory_size(directory_path):
                 except (OSError, FileNotFoundError):
                     continue
     except (PermissionError, FileNotFoundError):
-        pass
+        console.print("Couldn't find {directory_path}... Exiting!", style="dark_orange")
+        sys.exit(1)
 
     return total_size
 
@@ -83,10 +96,12 @@ def run_tree_command(level, filename, path):
         if tree_result.returncode == 0:
             with open(filename, "w") as f:
                 f.write(tree_result.stdout)
-            print(f"Tree output saved to : {filename}")
+            console.print(f"Tree output saved to : [bold]{filename}[/bold]")
             return True
         else:
-            print(f"Error running tree command: {tree_result.stderr}")
+            console.print(
+                f"Error running tree command: {tree_result.stderr}", style="dark_orange"
+            )
             return False
     except FileNotFoundError:
         print("  ✗ 'tree' command not found. Please install it first.")
@@ -95,13 +110,13 @@ def run_tree_command(level, filename, path):
         print("     On Arch: sudo pacman -S tree")
         return False
     except Exception as e:
-        print(f"Error running tree command: {e}")
+        console.print(f"Error running tree command: {e}", style="dark_orange")
         return False
 
 
 def count_total_files(directory):
     """
-    Recursively count allf files inside directory and subdirectories
+    Recursively count all files inside directory and subdirectories
     Args:
         directory: Path to the directory to count files in
 

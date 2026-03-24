@@ -49,17 +49,15 @@ def get_total_files_per_subfolder(directory):
                 file_count = count_total_files(item_path)
                 subfolders.append((item, item_path, file_count))
     except PermissionError:
-        print("Permission denied accessing some directories!")
+        console.print(
+            "Permission denied accessing some directories!", style="dark_orange"
+        )
 
     sorted_subfolders = sorted(subfolders)
     return sorted_subfolders
 
 
 def main():
-    # print("\n" + "=" * 60)
-    # print("DIRECTORY INFORMATION")
-    # print("=" * 60)
-
     print("\n")
     console.print(
         Panel(
@@ -87,10 +85,6 @@ def main():
     if tree_command_selection in ["y", "Y", "yes"]:
         tree_file_names = create_tree_filenames()
 
-    # print("\n" + "-" * 60)
-    # print("FILE COUNTS")
-    # print("-" * 60)
-
     print("\n")
     console.print(Panel("\tFILE COUNTS", style="dodger_blue2"))
 
@@ -102,73 +96,79 @@ def main():
     )
 
     # Count files in each subfolder
-
     subfolders = get_total_files_per_subfolder(directory)
 
     if subfolders:
-        # table_files_per_subfolder = Table(title="\nNumber of files in each subfolder")
         table_files_per_subfolder = Table(
             title="\nFiles in each subfolder", show_lines=True
         )
 
         table_files_per_subfolder.add_column("Folder", justify="center")
         table_files_per_subfolder.add_column("# Files", justify="center")
-        # print("\nNumber of files in each subfolder:")
 
         for folder, _, file_count in subfolders:
             table_files_per_subfolder.add_row(f"{folder}", f"{file_count}")
-            # table_files_per_subfolder.add_row(f"{file_count}")
 
         console.print(table_files_per_subfolder)
-        # print(f"  {folder}/: {file_count} files")
-
-        # print("\n")
 
     # Count by file type
+    print("\n")
     if directory_total_files > 0:
-        print("\nTop 10 extension files ")
+        console.print(Panel("\tTop 10 extension files "), style="dodger_blue2")
         file_types(directory)
 
-    print("\n" + "-" * 60)
-    print("DIRECTORY SIZES")
-    print("-" * 60)
+    print("\n")
+    console.print(Panel("\tDIRECTORY SIZES"), style="dodger_blue2")
 
     # Get size of directory
     directory_size = get_directory_size(directory)
-    print(f"\nSize of directory: {format_size(directory_size)}")
+    console.print(
+        f"\nSize of {directory}: [bold]{format_size(directory_size)}[/bold]\n",
+        style="turquoise4",
+    )
 
     # Get size of each subfolder
     if subfolders:
-        print("\nSize of each subfolder:")
+        table_subfolders_size = Table(title="Size of each subfolder", show_lines=True)
+
+        table_subfolders_size.add_column("Subfolder", justify="center")
+        table_subfolders_size.add_column("Size", justify="center")
+
         for folder_name, folder_path, _ in subfolders:
             folder_size = get_directory_size(folder_path)
-            print(f"  {folder_name}/: {format_size(folder_size)}")
+            table_subfolders_size.add_row(
+                f"{folder_name}", f"{format_size(folder_size)}"
+            )
+
+        console.print(table_subfolders_size)
 
     if tree_command_selection in ["y", "Y", "yes"]:
-        print("\n" + "-" * 60)
-        print("TREE STRUCTURE OUTPUT")
-        print("-" * 60)
-
-        # Generate tree outputs
-        print("\nGenerating tree command output...")
+        console.print(Panel("\tTREE STRUCTURE OUTPUT"), style="dodger_blue2")
 
         for level, filename in tree_file_names.items():
-            print(f"\nLevel {level}:")
-            run_tree_command(level, filename, directory)
+            with console.status(""):
+                console.print(f"\nLevel {level}:", style="turquoise4")
+                run_tree_command(level, filename, directory)
 
-    print("\n" + "=" * 60)
-    print("SUMMARY")
-    print("=" * 60)
+    print("\n")
+    console.print(Panel("\tSUMMARY"), style="dodger_blue2")
 
-    print(f"• Directory analyzed: {directory}")
-    print(f"• Files in directory: {directory_total_files}")
-    print(f"• Total size: {format_size(directory_size)}")
+    console.print(f"• Directory analyzed: [bold]{directory}[/bold]", style="turquoise4")
+    console.print(
+        f"• Files in directory: [bold]{directory_total_files}[/bold]",
+        style="turquoise4",
+    )
+    console.print(
+        f"• Total size: [bold]{format_size(directory_size)}[/bold]", style="turquoise4"
+    )
 
     if tree_command_selection in ["y", "Y", "yes"]:
         print("• Tree outputs generated:")
         for level, filename in tree_file_names.items():
             if os.path.exists(filename):
-                print(f" - Level {level}: {filename}")
+                console.print(
+                    f" - Level {level}: [bold]{filename}[/bold]", style="turquoise4"
+                )
 
     print("\nScript completed successfully!")
     print("=" * 60)
